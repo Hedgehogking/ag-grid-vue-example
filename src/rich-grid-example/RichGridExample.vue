@@ -2,10 +2,10 @@
     <div style="width: 760px;">
         <div style="padding: 4px;">
             <div style="float: right;">
-                <input @keyup="onQuickFilterChanged" type="text" id="quickFilterInput"
+                <Input @keyup="onQuickFilterChanged" type="text" id="quickFilterInput"
                        placeholder="Type text to filter..."/>
-                <button :disabled="!showGrid" @click="showGrid=false">Destroy Grid</button>
-                <button :disabled="showGrid" @click="showGrid=true">Create Grid</button>
+                <Button type="primary" :disabled="!showGrid" @click="showGrid=false">Destroy Grid</Button>
+                <Button type="primary" :disabled="showGrid" @click="showGrid=true">Create Grid</Button>
             </div>
             <div>
                 <b>Employees Skills and Contact Details</b>
@@ -17,22 +17,22 @@
             <div style="padding: 4px;" class="toolbar">
             <span>
                 Grid API:
-                <button @click="gridOptions.api.selectAll()">Select All</button>
-                <button @click="gridOptions.api.deselectAll()">Clear Selection</button>
+                <Button type="primary" @click="gridOptions.api.selectAll()">Select All</Button>
+                <Button type="primary" @click="gridOptions.api.deselectAll()">Clear Selection</Button>
             </span>
                 <span style="margin-left: 20px;">
                 Column API:
-                <button @click="gridOptions.columnApi.setColumnVisible('country', false)">Hide Country Column</button>
-                <button @click="gridOptions.columnApi.setColumnVisible('country', true)">Show Country Column</button>
+                <Button type="primary" @click="gridOptions.columnApi.setColumnVisible('country', false)">Hide Country Column</Button>
+                <Button type="primary" @click="gridOptions.columnApi.setColumnVisible('country', true)">Show Country Column</Button>
             </span>
             </div>
             <div style="clear: both;"></div>
             <div style="padding: 4px;" class="toolbar">
                 <label>
-                    <input type="checkbox" v-model="sideBar"/>
+                    <Checkbox v-model="sideBar"/>
                     Show Side Bar
                 </label>
-                <button @click="createRowData()">Refresh Data</button>
+                <Button type="primary" @click="createRowData()">Refresh Data</Button>
             </div>
             <div style="clear: both;"></div>
             <ag-grid-vue style="width: 100%; height: 350px;" class="ag-theme-balham"
@@ -82,6 +82,7 @@
     import {ProficiencyFilter} from './proficiencyFilter';
     import {SkillFilter} from './skillFilter';
     import DateComponent from './DateComponent.vue';
+    import PercentCellRenderer from './PercentCellRenderer.vue';
     import HeaderGroupComponent from './HeaderGroupComponent.vue';
     import RefData from './refData'
 
@@ -176,7 +177,8 @@
                                 headerName: "Proficiency",
                                 field: "proficiency",
                                 width: 120,
-                                cellRenderer: percentCellRenderer,
+                                // cellRenderer: this.percentCellRenderer,
+                                cellRendererFramework: PercentCellRenderer,
                                 filter: ProficiencyFilter
                             },
                         ]
@@ -268,7 +270,34 @@
             // here we use one generic event to handle all the column type events.
             // the method just prints the event name
             onColumnEvent(event) {
-                console.log('onColumnEvent: ' + event);
+                console.log('onColumnEvent: ', event);
+            },
+
+            percentCellRenderer(params) {
+                console.log(params);
+                let value = params.value;
+
+                let eDivPercentBar = document.createElement('div');
+                eDivPercentBar.className = 'div-percent-bar';
+                eDivPercentBar.style.width = value + '%';
+                if (value < 20) {
+                    eDivPercentBar.style.backgroundColor = 'red';
+                } else if (value < 60) {
+                    eDivPercentBar.style.backgroundColor = '#ff9900';
+                } else {
+                    eDivPercentBar.style.backgroundColor = '#00A000';
+                }
+
+                let eValue = document.createElement('div');
+                eValue.className = 'div-percent-value';
+                eValue.innerHTML = value + '%';
+
+                let eOuterDiv = document.createElement('div');
+                eOuterDiv.className = 'div-outer-div';
+                eOuterDiv.appendChild(eValue);
+                eOuterDiv.appendChild(eDivPercentBar);
+
+                return eOuterDiv;
             }
         },
         beforeMount() {
@@ -307,31 +336,6 @@
         return result;
     }
 
-    function percentCellRenderer(params) {
-        let value = params.value;
-
-        let eDivPercentBar = document.createElement('div');
-        eDivPercentBar.className = 'div-percent-bar';
-        eDivPercentBar.style.width = value + '%';
-        if (value < 20) {
-            eDivPercentBar.style.backgroundColor = 'red';
-        } else if (value < 60) {
-            eDivPercentBar.style.backgroundColor = '#ff9900';
-        } else {
-            eDivPercentBar.style.backgroundColor = '#00A000';
-        }
-
-        let eValue = document.createElement('div');
-        eValue.className = 'div-percent-value';
-        eValue.innerHTML = value + '%';
-
-        let eOuterDiv = document.createElement('div');
-        eOuterDiv.className = 'div-outer-div';
-        eOuterDiv.appendChild(eValue);
-        eOuterDiv.appendChild(eDivPercentBar);
-
-        return eOuterDiv;
-    }
 
 </script>
 
@@ -370,7 +374,7 @@
         z-index: 200;
     }
 
-    .toolbar button {
+    .toolbar Button {
         margin-left: 5px;
         margin-right: 5px;
         padding: 2px;
